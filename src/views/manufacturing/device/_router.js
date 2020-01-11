@@ -6,7 +6,7 @@ export default [
     children: [
       {
         name: 'machine.index',
-        path: 'index',
+        path: '',
         component: () => import(/* webpackChunkName: "machine" */ './machine/index'),
       },
       {
