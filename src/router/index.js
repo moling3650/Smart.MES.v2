@@ -12,7 +12,6 @@ const routes = [
     component: Home,
     children: routers.keys().map(key => routers(key).default).flat(),
   },
-
 ]
 
 const router = new VueRouter({

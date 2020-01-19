@@ -1,11 +1,10 @@
 export default [
   {
-    name: 'machine',
     path: '/manufacturing/device/machine',
     component: () => import(/* webpackChunkName: "machine" */ './machine'),
     children: [
       {
-        name: 'machine.index',
+        name: 'machine',
         path: '',
         component: () => import(/* webpackChunkName: "machine" */ './machine/index'),
       },
