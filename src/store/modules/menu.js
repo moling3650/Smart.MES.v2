@@ -14,23 +14,25 @@ const menu = {
   },
 
   getters: {
-    modules (state) {
+    menuMap (state) {
       // 注册所有菜单
-      const menuMap = state.list.reduce((dict, menu) => {
+      const _menuMap = state.list.reduce((dict, menu) => {
         dict[menu.code] = menu
         return dict
       }, {})
       // 生成父子级关系
       state.list.forEach(menu => {
         if (menu.parentCode) {
-          if (!menuMap[menu.parentCode].children) {
-            menuMap[menu.parentCode].children = []
+          if (!_menuMap[menu.parentCode].children) {
+            _menuMap[menu.parentCode].children = []
           }
-          menuMap[menu.parentCode].children.push(menu)
+          _menuMap[menu.parentCode].children.push(menu)
         }
       })
-      // 选取根菜单
-      return Object.values(menuMap).filter(menu => !menu.parentCode)
+      return _menuMap
+    },
+    modules (state) {
+      return state.list.filter(menu => !menu.parentCode)
     },
   },
 }
