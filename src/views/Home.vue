@@ -26,7 +26,28 @@
         </div>
       </div>
       <div class="main">
-        <div class="tags"/>
+        <div class="tags-wrap">
+          <ul ref="tags" class="tags">
+            <li v-for="t in visiableTags" :key="t.code" class="tag" :class="{ active: t.code === activeTag }" @click="clickTag(t)">
+              <i v-if="!t.parentCode" class="iconfont" :class="`icon-${t.icon}`"/>
+              <span v-if="t.parentCode">{{ t.name }}</span>
+              <i v-if="t.parentCode" class="iconfont icon-close-circle" style="font-size: 16px;" @click.stop="closeTag(t)"/>
+            </li>
+          </ul>
+          <div class="tags-more">
+            <el-dropdown size="mini">
+              <span class="el-dropdown-link">
+                <i class="iconfont icon-gengduo"/>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="closeAllTags">关闭全部</el-dropdown-item>
+                <el-dropdown-item @click.native="closeOtherTags">关闭其他标签</el-dropdown-item>
+                <el-dropdown-item v-for="(t, i) in hideTags" :key="t.code" :divided="!i" @click.native="clickTag(t)">{{ t.name }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
+        </div>
+
         <router-view class="page"/>
       </div>
     </div>
@@ -41,19 +62,33 @@ export default {
     return {
       activeModule: '',
       filterText: '',
+      activeTag: '',
+      tags: [],
+      maxVisiableTag: 2,
     }
   },
   computed: {
-    ...mapGetters(['modules']),
+    ...mapGetters(['menuMap', 'modules']),
 
     // 根据激活的模块生成菜单树
     menuTree () {
-      const m = this.modules.find(m => m.code === this.activeModule)
+      if (!this.activeModule) {
+        return []
+      }
+      const m = this.menuMap[this.activeModule]
       if (!m) {
         console.error(`找不到编号为${this.activeModule}的模块`)
         return []
       }
       return m.children || []
+    },
+
+    visiableTags () {
+      return this.tags.slice(0, this.maxVisiableTag)
+    },
+
+    hideTags () {
+      return this.tags.slice(this.maxVisiableTag)
     },
   },
   watch: {
@@ -68,7 +103,15 @@ export default {
     filterText (value) {
       this.$refs.tree.filter(value)
     },
+
+    activeTag (value) {
+      const route = this.menuMap[value]
+      if (this.$route.name !== route.code) {
+        this.$router.push({ name: route.code })
+      }
+    },
   },
+
   mounted () {
     if (this.$route.name === 'home' && this.modules.length) {
       this.moduleChange(this.modules[0])
@@ -76,8 +119,9 @@ export default {
   },
   methods: {
     // 改变模块
-    moduleChange ({ route, children }) {
-      this.$router.push({ name: route })
+    moduleChange (m) {
+      this.tags = [m]
+      this.activeTag = m.code
     },
 
     // 筛选菜单的方法
@@ -90,13 +134,43 @@ export default {
       if (!data.route) {
         return
       }
+      this._setActiveTag(data)
+    },
+
+    _setActiveTag (tag) {
+      const index = this.tags.findIndex(t => t.code === tag.code)
+      if (!~index) {
+        this.tags.splice(this.maxVisiableTag - 1, 0, tag)
+      } else if (index > this.maxVisiableTag) {
+        this.tags.splice(index, 1)
+        this.tags.splice(this.maxVisiableTag, 0, tag)
+      }
+
+      this.activeTag = tag.code
+    },
+
+    clickTag (tag) {
+      this.activeTag = tag.code
+    },
+
+    closeTag (tag) {
+
+    },
+
+    closeAllTags () {
+      this.tags = [this.tags[0]]
+      this.activeTag = this.tags[0].code
+    },
+
+    closeOtherTags () {
+
     },
   },
 }
 </script>
 
 <style lang="scss">
-.menu-tree{
+.menu-tree {
   .el-tree-node__expand-icon {
     font-size: 16px;
     color: #2c3d59;
@@ -209,10 +283,71 @@ export default {
       flex-direction: column;
       background-color: #f7f8fa;
 
-      .tags {
+      .tags-wrap {
         flex-basis: 24px;
         margin: 3px 0;
         background-color: #fff;
+        display: flex;
+
+        .tags {
+          flex-grow: 1;
+          display: flex;
+          align-items: center;
+
+          .iconfont {
+            font-size: 18px;
+
+            &.icon-close-circle {
+              font-size: 16px;
+            }
+          }
+
+          .tag {
+            position: relative;
+            height: 18px;
+            padding: 0 20px 0 10px;
+            border: 1px solid rgba(61, 77, 102, 0.2);
+            margin: 0 3px;
+            font-size: 10px;
+            line-height: 18px;
+            cursor: pointer;
+
+            &:first-child {
+              width: 50px;
+              padding: 0;
+              text-align: center;
+            }
+
+            &:hover {
+              background-color: rgba(61, 77, 102, 0.1);
+
+              .icon-close-circle {
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 2px;
+              }
+            }
+
+            &.active {
+              color: #fff;
+              background-color: #4b7efe;
+            }
+
+            .icon-close-circle {
+              display: none;
+            }
+          }
+        }
+
+        .tags-more {
+          flex-basis: 30px;
+          text-align: center;
+
+          .iconfont {
+            cursor: pointer;
+          }
+        }
       }
 
       .page {
