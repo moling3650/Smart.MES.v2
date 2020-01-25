@@ -56,6 +56,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { selectMenuByKey } from '@/utils/dom'
+
 export default {
   name: 'Home',
   data () {
@@ -64,7 +66,7 @@ export default {
       filterText: '',
       activeTag: '',
       tags: [],
-      maxVisiableTag: 2,
+      maxVisiableTag: 3,
     }
   },
   computed: {
@@ -99,14 +101,17 @@ export default {
       },
       immediate: true,
     },
+
     // 根据输入筛选菜单
     filterText (value) {
       this.$refs.tree.filter(value)
     },
 
+    // 根据激活标签页面跳转路由
     activeTag (value) {
       const route = this.menuMap[value]
       if (this.$route.name !== route.code) {
+        selectMenuByKey(route.code)
         this.$router.push({ name: route.code })
       }
     },
@@ -117,16 +122,31 @@ export default {
       this.moduleChange(this.modules[0])
     }
   },
+
   methods: {
+    // 筛选菜单的方法
+    filterMenu (value, data) {
+      return !value || ~data.name.indexOf(value)
+    },
+
     // 改变模块
     moduleChange (m) {
       this.tags = [m]
       this.activeTag = m.code
     },
 
-    // 筛选菜单的方法
-    filterMenu (value, data) {
-      return !value || ~data.name.indexOf(value)
+    // 激活标签
+    _setActiveTag (tag) {
+      // 查找当前标签在标签列表的下标
+      const index = this.tags.findIndex(t => t.code === tag.code)
+      const maxVisiableTagIndex = this.maxVisiableTag - 1
+      if (!~index) { // 如果菜单页面没在标签列表
+        this.tags.splice(maxVisiableTagIndex, 0, tag)
+      } else if (index > maxVisiableTagIndex) { // 如果菜单页面在标签列表但已折叠
+        this.tags.splice(index, 1)
+        this.tags.splice(maxVisiableTagIndex, 0, tag)
+      }
+      this.activeTag = tag.code
     },
 
     // 点击菜单
@@ -137,59 +157,58 @@ export default {
       this._setActiveTag(data)
     },
 
-    _setActiveTag (tag) {
-      const index = this.tags.findIndex(t => t.code === tag.code)
-      if (!~index) {
-        this.tags.splice(this.maxVisiableTag - 1, 0, tag)
-      } else if (index > this.maxVisiableTag) {
-        this.tags.splice(index, 1)
-        this.tags.splice(this.maxVisiableTag, 0, tag)
-      }
-
-      this.activeTag = tag.code
-    },
-
+    // 点击标签
     clickTag (tag) {
-      this.activeTag = tag.code
+      this._setActiveTag(tag)
     },
 
+    // 关闭标签
     closeTag (tag) {
-
+      const index = this.tags.findIndex(t => t.code === tag.code)
+      this.tags.splice(index, 1)
+      if (this.activeTag === tag.code) {
+        this.activeTag = this.tags[index] ? this.tags[index].code : this.tags[index - 1].code
+      }
     },
 
+    // 关闭所有菜单页面激活模块页面
     closeAllTags () {
       this.tags = [this.tags[0]]
       this.activeTag = this.tags[0].code
     },
 
+    // 关闭所有非激活菜单页面
     closeOtherTags () {
-
+      this.tags = this.tags.filter(tag => !tag.parentCode || tag.code === this.activeTag)
     },
   },
 }
 </script>
 
 <style lang="scss">
-.menu-tree {
-  .el-tree-node__expand-icon {
-    font-size: 16px;
-    color: #2c3d59;
+.menu {
 
-    &.is-leaf {
-      color: transparent;
+  .menu-tree {
+
+    .el-tree-node__expand-icon {
+      font-size: 16px;
+      color: #2c3d59;
+
+      &.is-leaf {
+        color: transparent;
+      }
+    }
+
+    .el-tree-node__content:hover {
+      background-color: rgba(75, 126, 254, .1);
+    }
+
+    .el-tree-node__content.is-selected {
+      border-radius: 3px;
+      color: #fff;
+      background-color: rgb(75, 126, 254);
     }
   }
-
-  .el-tree-node__content:hover {
-    background-color: rgba(75, 126, 254, .1);
-  }
-
-  .el-tree-node__content.is-selected {
-    border-radius: 3px;
-    color: #fff;
-    background-color: rgb(75, 126, 254);
-  }
-
 }
 </style>
 
