@@ -237,7 +237,7 @@ export default {
     display: flex;
 
     .sidebar {
-      flex-basis: 70px;
+      flex: 0 0 70px;
       background-color: #2c3d59;
 
       .module {
@@ -269,7 +269,7 @@ export default {
 
     .menu {
       position: relative;
-      flex-basis: 230px;
+      flex: 0 0 230px;
       background-color: #f2f6fa;
 
       &-filter {
