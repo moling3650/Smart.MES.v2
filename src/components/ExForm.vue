@@ -8,7 +8,8 @@
       </el-col>
       <el-col :span="24">
         <el-form-item>
-          <el-button type="primary" @click="submit">提交</el-button>
+          <el-button @click="reset">重 置</el-button>
+          <el-button type="primary" @click="submit">提 交</el-button>
         </el-form-item>
       </el-col>
     </el-row>
@@ -69,7 +70,7 @@ export default {
     // 监听formData改变重置表单字段值
     formData: {
       handler () {
-        this._resetForm()
+        this.reset()
       },
       immediate: true,
     },
@@ -81,17 +82,32 @@ export default {
     },
 
     // 表单字段重置成默认值
-    _resetForm () {
-      const form = {}
-      for (const key in this.formItems) {
-        if (this.formItems[key].component === 'ex-select') {
-          form[key] = this.formItems[key].multiple ? [] : ''
+    reset () {
+      // 处理表单字段的值
+      this.form = this.formItemList.reduce((form, field) => {
+        const key = field.value
+        form[key] = ''
+        if (field.component === 'ex-select' && field.attrs.multiple) {
+          form[key] = []
+        } else if (field.component === 'el-switch') {
+          form[key] = field.attrs.inactiveValue === undefined ? false : field.attrs.inactiveValue
         }
         if (key in this.formData) {
           form[key] = this.formData[key]
         }
-      }
-      this.form = form
+        return form
+      }, {})
+
+      this.$nextTick(() => {
+        // 调用字段改变的回调函数
+        for (const field in this.changeEvents) {
+          this.fieldChange(field)
+        }
+        // 重置校验提示
+        if (this.$refs.form) {
+          this.$refs.form.resetFields()
+        }
+      })
     },
 
     // 监听表单字段的值变化
