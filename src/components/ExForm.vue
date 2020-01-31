@@ -6,7 +6,7 @@
           <component :is="item.component" v-model.trim="form[item.value]" v-bind="item.attrs" @change="fieldChange(item.value)"/>
         </el-form-item>
       </el-col>
-      <el-col :span="24">
+      <el-col v-if="!hideButtons" :span="24">
         <el-form-item>
           <el-button @click="reset">重 置</el-button>
           <el-button type="primary" @click="submit">提 交</el-button>
@@ -43,6 +43,10 @@ export default {
       default () {
         return {}
       },
+    },
+    // 是否显示[重置]和[提交]按钮
+    hideButtons: {
+      type: Boolean,
     },
   },
   data () {
