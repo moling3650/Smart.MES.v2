@@ -1,10 +1,10 @@
 import Vue from 'vue'
 
 // 只会注册components文件下所有Ex开关的vue组件
-const ExComponents = require.context('../components', true, /Ex(.+)\.vue$/)
+const requireComponent = require.context('../components', true, /Ex(.+)\.vue$/)
 
-const components = ExComponents.keys().map(key => ExComponents(key).default)
-
-components.forEach(c => {
-  Vue.component(c.name, c)
+requireComponent.keys().forEach(fileName => {
+  const componentName = fileName.replace(/^\.\/(.*)\.\w+$/, '$1')
+  const componentConfig = requireComponent(fileName)
+  Vue.component(componentName, componentConfig.default || componentConfig)
 })
