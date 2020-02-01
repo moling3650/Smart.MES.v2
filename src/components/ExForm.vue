@@ -86,7 +86,7 @@ export default {
     },
 
     // 表单字段重置成默认值
-    _setFormDefaultValue () {
+    reset () {
       // 填充表单字段的值
       this.form = this.formItemList.reduce((form, field) => {
         const key = field.value
@@ -106,16 +106,9 @@ export default {
       for (const field in this.changeEvents) {
         this.fieldChange(field)
       }
-    },
-
-    // 表单字段重置成默认值
-    reset () {
-      this._setFormDefaultValue()
+      // 消除错误提示
       this.$nextTick(() => {
-        // 重置校验提示
-        if (this.$refs.form) {
-          this.$refs.form.resetFields()
-        }
+        this.$refs.form.clearValidate()
       })
     },
 
