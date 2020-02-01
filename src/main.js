@@ -6,6 +6,7 @@ import store from './store'
 import './styles/index.scss'
 import './plugins/element'
 import './plugins/registerComponents'
+import './plugins/registerMethods'
 
 Vue.config.productionTip = false
 
