@@ -86,27 +86,32 @@ export default {
     },
 
     // 表单字段重置成默认值
-    reset () {
-      // 处理表单字段的值
+    _setFormDefaultValue () {
+      // 填充表单字段的值
       this.form = this.formItemList.reduce((form, field) => {
         const key = field.value
-        form[key] = ''
-        if (field.component === 'ex-select' && field.attrs.multiple) {
+        if (key in this.formData) {
+          form[key] = this.formData[key]
+        } else if (field.component === 'ex-select' && field.attrs.multiple) {
           form[key] = []
         } else if (field.component === 'el-switch') {
           form[key] = field.attrs.inactiveValue === undefined ? false : field.attrs.inactiveValue
-        }
-        if (key in this.formData) {
-          form[key] = this.formData[key]
+        } else {
+          form[key] = ''
         }
         return form
       }, {})
 
+      // 调用字段值改变的回调函数
+      for (const field in this.changeEvents) {
+        this.fieldChange(field)
+      }
+    },
+
+    // 表单字段重置成默认值
+    reset () {
+      this._setFormDefaultValue()
       this.$nextTick(() => {
-        // 调用字段改变的回调函数
-        for (const field in this.changeEvents) {
-          this.fieldChange(field)
-        }
         // 重置校验提示
         if (this.$refs.form) {
           this.$refs.form.resetFields()
