@@ -4,6 +4,14 @@ import ExDialogForm from '@/components/ExDialogForm'
 const ExDialogFormConstructor = Vue.extend(ExDialogForm)
 
 let instance = null
+// 弹框默认属性
+const defaultAttrs = {
+  appendToBody: true,
+  center: true,
+  closeOnClickModal: false,
+  closeOnPressEscape: false,
+  showClose: true,
+}
 
 // 创建弹框表单实例
 function createInstance () {
@@ -21,7 +29,7 @@ function createInstance () {
 // 打开弹框表单
 function showDialogForm ({ formItems = {}, formData = {}, rules = {}, changeEvents = {}, ...attrs }) {
   instance = instance || createInstance()
-  instance.attrs = attrs
+  instance.attrs = { ...defaultAttrs, ...attrs }
   instance.changeEvents = changeEvents
   instance.rules = rules
   instance.formItems = formItems
