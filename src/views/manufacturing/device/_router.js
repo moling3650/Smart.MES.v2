@@ -9,9 +9,9 @@ export default [
         component: () => import(/* webpackChunkName: "machine" */ './machine/index'),
       },
       {
-        name: 'machine.dataPoint',
-        path: 'dataPoint',
-        component: () => import(/* webpackChunkName: "machine" */ './machine/dataPoint'),
+        name: 'machine.data_point',
+        path: 'data_point',
+        component: () => import(/* webpackChunkName: "machine" */ './machine/data_point'),
       },
     ],
   },
