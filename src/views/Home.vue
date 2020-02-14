@@ -110,10 +110,14 @@ export default {
     // 根据激活标签页面跳转路由
     activeTag (value) {
       const route = this.menuMap[value]
-      if (this.$route.name !== route.code) {
-        selectMenuByKey(route.code)
-        this.$router.push({ name: route.code })
+      const params = {}
+      if (route.params) {
+        const [key, val] = route.params.split('=')
+        params[key] = val
       }
+
+      selectMenuByKey(route.code)
+      this.$router.push({ name: route.route, params })
     },
   },
 
