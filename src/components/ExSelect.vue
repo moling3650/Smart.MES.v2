@@ -41,7 +41,7 @@ export default {
     },
     value: {
       type: [String, Number, Array],
-      required: true,
+      default: '',
     },
     optionRender: {
       type: Function,
